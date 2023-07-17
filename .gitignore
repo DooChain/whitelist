@@ -46,3 +46,8 @@ yarn-error.log*
 next-env.d.ts
 
 whiteList.json
+<<<<<<< HEAD
+=======
+
+.env
+>>>>>>> 0e15a2bf3d7b33dbc9275dcb861562f05e1a303a
