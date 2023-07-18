@@ -93,9 +93,13 @@ export default function Home() {
 
   const buy = async () => {
     try {
+      console.log("Poping up the metamask to confirm the gas fee");
+      const buyTxn = await contract.buy(myProof);
       console.log("Buying...please wait.");
-      let buyTxn = await contract.buy(myProof);
-      console.log("Buy function called successfully");
+      await buyTxn.wait();
+      console.log(
+        `Buy function called successfully.\nYou can check on https://sepolia.etherscan.io/address/${buyTxn.hash}`
+      );
     } catch (error) {
       console.log(error);
     }
