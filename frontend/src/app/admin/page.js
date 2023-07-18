@@ -30,7 +30,7 @@ export default function Home() {
       });
 
       const data = await response.json();
-      console.log("deployed address", data);
+      console.log("deployed address", data.contract);
     } catch (error) {
       console.log("Error:", error);
       // Handle error scenarioW
@@ -55,6 +55,10 @@ export default function Home() {
           rows="22"
           placeholder="Your message"
           value={contacts.join("\n")}
+          onChange={(e) => {
+            setContacts(e.target.value.split("\n"));
+            console.log(contacts);
+          }}
         ></textarea>
       </div>
     </div>

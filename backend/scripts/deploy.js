@@ -5,10 +5,13 @@
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
 const hre = require("hardhat");
+const fs = require("fs");
 
 async function main() {
+  const data = fs.readFileSync("../data.json", "utf8");
+  const jsonData = await JSON.parse(data);
   const whiteListContract = await hre.ethers.deployContract("WhiteList", [
-    "0x9f8f5a2556959716e288f3c87b99bdd6f65d5e325e75592494d867b245db523a",
+    jsonData.roothash,
   ]);
   await whiteListContract.waitForDeployment();
   console.log(`${whiteListContract.target}`);
