@@ -12,13 +12,13 @@ contract WhiteList {
         rootHash = _rootHash;
     }
 
-    // modifier isWhiteListedAddress(bytes32[] calldata proof) {
-    //     require(
-    //         isValidProof(proof, keccak256(abi.encodePacked(msg.sender))),
-    //         "Not WhiteListed Address"
-    //     );
-    //     _;
-    // }
+    modifier isWhiteListedAddress(bytes32[] calldata proof) {
+        require(
+            isValidProof(proof, keccak256(abi.encodePacked(msg.sender))),
+            "Not WhiteListed Address"
+        );
+        _;
+    }
 
     function isValidProof(
         bytes32[] calldata proof,
@@ -27,13 +27,14 @@ contract WhiteList {
         return MerkleProof.verify(proof, rootHash, leaf);
     }
 
-    // function whiteListIncrement(
-    //     bytes32[] calldata proof
-    // ) external isWhiteListedAddress(proof) {
-    //     count++;
-    // }
+    function buy(
+        bytes32[] calldata proof
+    ) external isWhiteListedAddress(proof) {}
 
-    function checkIfValid(bytes32[] calldata proof) public view returns (bool) {
-        return isValidProof(proof, keccak256(abi.encodePacked(msg.sender)));
+    function checkIfValid(
+        bytes32[] calldata proof,
+        bytes20 addr
+    ) public view returns (bool) {
+        return isValidProof(proof, keccak256(abi.encodePacked(addr)));
     }
 }
