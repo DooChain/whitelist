@@ -1,6 +1,7 @@
 "use client";
 import { useAccount } from "wagmi";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+
 export default function Home() {
   const { address, isConnected } = useAccount();
   const [contacts, setContacts] = useState([]);

@@ -22,7 +22,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const json = await request.json();
-    console.log(json.contacts);
+    // console.log(json.contacts);
 
     //  Hashing All Leaf Individual
     const leaves = await json.contacts.map((leaf) => keccak256(leaf));
@@ -38,6 +38,7 @@ export async function POST(request) {
     const newData = {
       roothash: buf2Hex(tree.getRoot()),
       contacts: json.contacts,
+      contract: { updated: false, address: "" },
     };
     const result = fs.writeFileSync("../data.json", JSON.stringify(newData));
 
@@ -47,6 +48,13 @@ export async function POST(request) {
       });
       const text = await response.text();
       console.log("response", text);
+
+      const updateData = {
+        ...newData,
+        contract: { updated: true, address: text },
+      };
+      fs.writeFileSync("../data.json", JSON.stringify(updateData));
+
       let json_response = {
         status: "success",
         contract: text,

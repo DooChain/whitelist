@@ -23,7 +23,7 @@ app.get("/api", (req, res) => {
       }
 
       console.log(`Deploy script output: ${stdout}`);
-      res.status(200).send(stdout);
+      res.status(200).send(stdout.split("\n")[0]);
     }
   );
 });

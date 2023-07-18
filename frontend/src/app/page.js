@@ -6,15 +6,38 @@ import {} from "ethers";
 import abi from "../../../backend/artifacts/contracts/WhiteList.sol/WhiteList.json";
 import { useAccount } from "wagmi";
 
-const contractAddress = "0xb7b3f0B17961257CD342C491bbe6192ACf6B012b";
+// const contractAddress = "0xb7b3f0B17961257CD342C491bbe6192ACf6B012b";
 
 export default function Home() {
   const { address, isConnected } = useAccount();
   const [myProof, setMyProof] = useState([]);
   const [inputAddress, setInputAddress] = useState("");
   const [contract, setContract] = useState(null);
+  const [contractAddress, setContractAddress] = useState(
+    "0x91F938EBBc846d5981B96A37bb1E53BBB05C7FF6"
+  );
 
-  const update = async () => {
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Perform a request to the backend API to check for updates
+      fetch("/api/contract")
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.updated) {
+            setContractAddress(data.address);
+          }
+        })
+        .catch((error) => {
+          console.error("Error checking for updates:", error);
+        });
+    }, 1000); // Check every 5 seconds
+
+    return () => {
+      clearInterval(interval); // Cleanup the interval on component unmount
+    };
+  }, []);
+
+  const updateMyProof = async () => {
     // fetch own proof from the backend
     try {
       const response = await fetch("/api/check", {
@@ -27,13 +50,15 @@ export default function Home() {
 
       const data = await response.json();
       console.log("your address is ", address);
-      console.log("your proof", data);
       setMyProof(data.proof);
     } catch (error) {
       console.log("Error:", error);
       // Handle error scenario
     }
+  };
+  const updateContract = async () => {
     // build the contract that can be used in multiple functions
+    console.log("contractAddress", contractAddress);
     try {
       const { ethereum } = window;
       if (ethereum) {
@@ -46,7 +71,7 @@ export default function Home() {
           abi.abi,
           signer
         );
-        console.log("whiteListContract:", whiteListContract);
+        // console.log("whiteListContract:", whiteListContract);
         setContract(whiteListContract);
       } else {
         console.log("Ethereum object doesn't exist!");
@@ -57,13 +82,13 @@ export default function Home() {
   };
 
   useEffect(() => {
-    console.log("Connected", address);
-    update();
-  }, [address]);
+    updateMyProof();
+    updateContract();
+  }, [address, contractAddress]);
 
   const askContractIfValid = async (proof) => {
     try {
-      console.log(proof, inputAddress);
+      // console.log(proof, inputAddress);
       let checkTxn = await contract.checkIfValid(proof, inputAddress);
       console.log("Checking...please wait.");
       console.log("The address you entered is", checkTxn ? "" : "not", "valid");
@@ -83,7 +108,7 @@ export default function Home() {
       });
 
       const data = await response.json();
-      console.log("Proof of entered address", data);
+      // console.log("Proof of entered address", data);
       askContractIfValid(data.proof);
     } catch (error) {
       console.log("Error:", error);
