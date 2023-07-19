@@ -11,18 +11,21 @@ export default function Home() {
   const [text, setText] = useState("");
   const [contract, setContract] = useState(null);
 
-  useEffect(async () => {
-    try {
-      const response = await fetch("/api/list", {
-        method: "GET",
-      });
+  useEffect(() => {
+    const getContacts = async () => {
+      try {
+        const response = await fetch("/api/list", {
+          method: "GET",
+        });
 
-      const data = await response.json();
-      setContacts(data.contacts);
-    } catch (error) {
-      console.log("Error:", error);
-      // Handle error scenario
-    }
+        const data = await response.json();
+        setContacts(data.contacts);
+      } catch (error) {
+        console.log("Error:", error);
+        // Handle error scenario
+      }
+    };
+    getContacts();
   }, []);
 
   const updateContract = async () => {
