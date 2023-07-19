@@ -8,7 +8,7 @@ const buf2Hex = (x) => "0x" + x.toString("hex");
 export async function POST(request) {
   try {
     const json = await request.json();
-    console.log(json.address);
+    // console.log(json.address);
 
     const leaf = keccak256(json.address);
 
@@ -17,7 +17,7 @@ export async function POST(request) {
     let tempData = [];
     proof.map((x) => tempData.push(buf2Hex(x.data)));
 
-    console.log(tempData);
+    // console.log(tempData);
 
     let json_response = {
       status: "success",
