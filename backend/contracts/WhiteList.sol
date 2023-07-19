@@ -31,6 +31,10 @@ contract WhiteList {
         bytes32[] calldata proof
     ) external isWhiteListedAddress(proof) {}
 
+    function saveWhiteList(bytes32 _rootHash) public {
+        rootHash = _rootHash;
+    }
+
     function checkIfValid(
         bytes32[] calldata proof,
         bytes20 addr

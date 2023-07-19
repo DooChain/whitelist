@@ -1,10 +1,14 @@
 "use client";
 import { useAccount } from "wagmi";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
+import { ethers, BrowserProvider } from "ethers";
+import abi from "../../../../backend/artifacts/contracts/WhiteList.sol/WhiteList.json";
+const contractAddress = "0x420e727c31eD5D861fD27407DE6Be953d9Ca5bCE";
 
 export default function Home() {
   const { address, isConnected } = useAccount();
   const [contacts, setContacts] = useState([]);
+  const [contract, setContract] = useState(null);
 
   useEffect(async () => {
     try {
@@ -20,6 +24,35 @@ export default function Home() {
     }
   }, []);
 
+  const updateContract = async () => {
+    // build the contract that can be used in multiple functions
+    console.log("contractAddress", contractAddress);
+    try {
+      const { ethereum } = window;
+      if (ethereum) {
+        const web3Provider = new ethers.BrowserProvider(ethereum);
+        const signer = await web3Provider.getSigner();
+        // const provider = new ethers.providers.Web3Provider(ethereum);
+        // const signer = provider.getSigner();
+        const whiteListContract = new ethers.Contract(
+          contractAddress,
+          abi.abi,
+          signer
+        );
+        // console.log("whiteListContract:", whiteListContract);
+        setContract(whiteListContract);
+      } else {
+        console.log("Ethereum object doesn't exist!");
+      }
+    } catch (error) {
+      console.log("ERROR:", error);
+    }
+  };
+
+  useEffect(() => {
+    updateContract();
+  }, [address]);
+
   const update = async () => {
     try {
       const response = await fetch("/api/list", {
@@ -30,8 +63,19 @@ export default function Home() {
         body: JSON.stringify({ contacts: contacts }),
       });
 
-      const data = await response.json();
-      console.log("deployed address", data.contract);
+      const rootHash = await response.json();
+      console.log("roothash", rootHash);
+      try {
+        console.log("Poping up the metamask to confirm the gas fee");
+        const saveTxn = await contract.saveWhiteList(rootHash);
+        console.log("Saving...please wait.");
+        await saveTxn.wait();
+        console.log(
+          `Save function called successfully.\nYou can check on https://sepolia.etherscan.io/tx/${saveTxn.hash}`
+        );
+      } catch (error) {
+        console.log(error);
+      }
     } catch (error) {
       console.log("Error:", error);
       // Handle error scenarioW
@@ -49,7 +93,7 @@ export default function Home() {
       >
         Update
       </button>
-      <div className="relative mb-4 w-full px-4" data-te-input-wrapper-init>
+      <div className="mb-4 w-3/4 px-4" data-te-input-wrapper-init>
         <textarea
           className="border-2 peer block min-h-[auto] w-full rounded border-1 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-neutral-200 dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
           id="exampleFormControlTextarea1"

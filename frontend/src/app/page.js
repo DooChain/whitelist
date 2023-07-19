@@ -6,36 +6,13 @@ import {} from "ethers";
 import abi from "../../../backend/artifacts/contracts/WhiteList.sol/WhiteList.json";
 import { useAccount } from "wagmi";
 
-// const contractAddress = "0xb7b3f0B17961257CD342C491bbe6192ACf6B012b";
+const contractAddress = "0x420e727c31eD5D861fD27407DE6Be953d9Ca5bCE";
 
 export default function Home() {
   const { address, isConnected } = useAccount();
   const [myProof, setMyProof] = useState([]);
   const [inputAddress, setInputAddress] = useState("");
   const [contract, setContract] = useState(null);
-  const [contractAddress, setContractAddress] = useState(
-    "0x91F938EBBc846d5981B96A37bb1E53BBB05C7FF6"
-  );
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Perform a request to the backend API to check for updates
-      fetch("/api/contract")
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.updated) {
-            setContractAddress(data.address);
-          }
-        })
-        .catch((error) => {
-          console.error("Error checking for updates:", error);
-        });
-    }, 1000); // Check every 5 seconds
-
-    return () => {
-      clearInterval(interval); // Cleanup the interval on component unmount
-    };
-  }, []);
 
   const updateMyProof = async () => {
     // fetch own proof from the backend
@@ -84,7 +61,7 @@ export default function Home() {
   useEffect(() => {
     updateMyProof();
     updateContract();
-  }, [address, contractAddress]);
+  }, [address]);
 
   const askContractIfValid = async (proof) => {
     try {
@@ -123,7 +100,7 @@ export default function Home() {
       console.log("Buying...please wait.");
       await buyTxn.wait();
       console.log(
-        `Buy function called successfully.\nYou can check on https://sepolia.etherscan.io/address/${buyTxn.hash}`
+        `Buy function called successfully.\nYou can check on https://sepolia.etherscan.io/tx/${buyTxn.hash}`
       );
     } catch (error) {
       console.log(error);

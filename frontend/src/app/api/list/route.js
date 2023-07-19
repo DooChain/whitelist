@@ -14,7 +14,7 @@ export async function GET(request) {
   // Access the whiteList array
   const json_response = {
     status: "success",
-    contacts: jsonData.contacts,
+    contacts: jsonData,
   };
   return NextResponse.json(json_response);
 }
@@ -23,6 +23,8 @@ export async function POST(request) {
   try {
     const json = await request.json();
     // console.log(json.contacts);
+
+    fs.writeFileSync("../data.json", JSON.stringify(json.contacts));
 
     //  Hashing All Leaf Individual
     const leaves = await json.contacts.map((leaf) => keccak256(leaf));
@@ -33,39 +35,13 @@ export async function POST(request) {
     });
 
     // Get Root of Merkle Tree
-    console.log(`Here is Root Hash: ${buf2Hex(tree.getRoot())}`);
+    const rootHash = buf2Hex(tree.getRoot());
+    console.log(`Here is Root Hash: ${rootHash}`);
 
-    const newData = {
-      roothash: buf2Hex(tree.getRoot()),
-      contacts: json.contacts,
-      contract: { updated: false, address: "" },
-    };
-    const result = fs.writeFileSync("../data.json", JSON.stringify(newData));
-
-    try {
-      const response = await fetch("http://localhost:5000/api", {
-        method: "GET",
-      });
-      const text = await response.text();
-      console.log("response", text);
-
-      const updateData = {
-        ...newData,
-        contract: { updated: true, address: text },
-      };
-      fs.writeFileSync("../data.json", JSON.stringify(updateData));
-
-      let json_response = {
-        status: "success",
-        contract: text,
-      };
-      return new NextResponse(JSON.stringify(json_response), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } catch (error) {
-      console.log("Error:", error);
-    }
+    return new NextResponse(JSON.stringify(rootHash), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     let error_response = {
       status: "error",
