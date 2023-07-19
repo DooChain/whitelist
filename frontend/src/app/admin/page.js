@@ -8,6 +8,7 @@ const contractAddress = "0x420e727c31eD5D861fD27407DE6Be953d9Ca5bCE";
 export default function Home() {
   const { address, isConnected } = useAccount();
   const [contacts, setContacts] = useState([]);
+  const [text, setText] = useState("");
   const [contract, setContract] = useState(null);
 
   useEffect(async () => {
@@ -66,13 +67,21 @@ export default function Home() {
       const rootHash = await response.json();
       console.log("roothash", rootHash);
       try {
+        setText("Poping up the metamask to confirm the gas fee");
         console.log("Poping up the metamask to confirm the gas fee");
         const saveTxn = await contract.saveWhiteList(rootHash);
+        setText("Saving...please wait.");
         console.log("Saving...please wait.");
         await saveTxn.wait();
+        setText(
+          `Save function called successfully.\nYou can check on https://sepolia.etherscan.io/tx/${saveTxn.hash}`
+        );
         console.log(
           `Save function called successfully.\nYou can check on https://sepolia.etherscan.io/tx/${saveTxn.hash}`
         );
+        setTimeout(() => {
+          setText("");
+        }, 5000);
       } catch (error) {
         console.log(error);
       }
@@ -87,13 +96,14 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
+      <div>{text}</div>
       <button
         className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600 mb-4"
         onClick={update}
       >
         Update
       </button>
-      <div className="mb-4 w-3/4 px-4" data-te-input-wrapper-init>
+      <div className="mb-4 w-2/5 px-4" data-te-input-wrapper-init>
         <textarea
           className="border-2 peer block min-h-[auto] w-full rounded border-1 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-neutral-200 dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
           id="exampleFormControlTextarea1"

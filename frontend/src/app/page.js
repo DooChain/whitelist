@@ -12,6 +12,8 @@ export default function Home() {
   const { address, isConnected } = useAccount();
   const [myProof, setMyProof] = useState([]);
   const [inputAddress, setInputAddress] = useState("");
+  const [checkText, setCheckText] = useState("");
+  const [buyText, setBuyText] = useState("");
   const [contract, setContract] = useState(null);
 
   const updateMyProof = async () => {
@@ -66,9 +68,14 @@ export default function Home() {
   const askContractIfValid = async (proof) => {
     try {
       // console.log(proof, inputAddress);
-      let checkTxn = await contract.checkIfValid(proof, inputAddress);
+      setCheckText("Checking...please wait.");
       console.log("Checking...please wait.");
+      let checkTxn = await contract.checkIfValid(proof, inputAddress);
+      setCheckText(`The address you entered is ${checkTxn ? "" : "not"} valid`);
       console.log("The address you entered is", checkTxn ? "" : "not", "valid");
+      setTimeout(() => {
+        setCheckText("");
+      }, 5000);
     } catch (error) {
       console.log(error);
     }
@@ -95,15 +102,27 @@ export default function Home() {
 
   const buy = async () => {
     try {
+      setBuyText("Poping up the metamask to confirm the gas fee");
       console.log("Poping up the metamask to confirm the gas fee");
       const buyTxn = await contract.buy(myProof);
+      setBuyText("Buying...please wait.");
       console.log("Buying...please wait.");
       await buyTxn.wait();
-      console.log(
+      setBuyText(
         `Buy function called successfully.\nYou can check on https://sepolia.etherscan.io/tx/${buyTxn.hash}`
       );
+      console.log(
+        `Buy function called successfully. You can check on https://sepolia.etherscan.io/tx/${buyTxn.hash}`
+      );
+      setTimeout(() => {
+        setBuyText("");
+      }, 5000);
     } catch (error) {
+      setBuyText("Not whitelisted address");
       console.log(error);
+      setTimeout(() => {
+        setBuyText("");
+      }, 5000);
     }
   };
 
@@ -111,6 +130,7 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center h-screen">
       {isConnected ? (
         <>
+          <div>{checkText}</div>
           <div className="flex items-center space-x-4 w-1/2 my-3">
             <input
               type="text"
@@ -130,6 +150,7 @@ export default function Home() {
             </button>
           </div>
 
+          <div>{buyText}</div>
           <button
             type="submit"
             className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 focus:outline-none focus:bg-purple-600 mb-3"
